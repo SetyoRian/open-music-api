@@ -30,7 +30,7 @@ class MusicService {
 
   async getOneAlbum(id) {
     const getAlbum = await this._pool.query(
-      'SELECT albums.id AS "albumId", albums.name, albums.year, songs.id, songs.title, songs.performer FROM albums LEFT OUTER JOIN songs ON albums.id = songs."albumId" WHERE albums.id = $1',
+      'SELECT albums.id AS "albumId", albums.name, albums.year, songs.id, songs.title, songs.performer FROM albums LEFT OUTER JOIN songs ON albums.id = songs.album_id WHERE albums.id = $1',
       [id],
     );
 
@@ -38,7 +38,6 @@ class MusicService {
       throw new NotFoundError(`Album dengan id ${id} tidak ditemukan`);
     }
 
-    console.log(getAlbum.rows);
     const result = {
       id: getAlbum.rows[0].albumId,
       name: getAlbum.rows[0].name,
@@ -63,7 +62,7 @@ class MusicService {
   async editOneAlbum(id, { name, year }) {
     const updatedAt = new Date().toISOString();
 
-    const updateAlbum = await this._pool.query('UPDATE albums SET name = $1, year = $2, "updatedAt" = $3 WHERE id = $4 RETURNING id', [name, year, updatedAt, id]);
+    const updateAlbum = await this._pool.query('UPDATE albums SET name = $1, year = $2, "updated_at" = $3 WHERE id = $4 RETURNING id', [name, year, updatedAt, id]);
 
     if (!updateAlbum.rows.length) {
       throw new NotFoundError(`Album dengan id ${id} tidak ditemukan`);
@@ -128,7 +127,7 @@ class MusicService {
     const updatedAt = new Date().toISOString();
 
     const updateAlbum = await this._pool.query(
-      'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, "albumId" = $6, "updatedAt" = $7 WHERE id = $8 RETURNING id',
+      'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6, "updated_at" = $7 WHERE id = $8 RETURNING id',
       [title, year, genre, performer, duration, albumId, updatedAt, id],
     );
 

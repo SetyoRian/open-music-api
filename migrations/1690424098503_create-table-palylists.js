@@ -1,5 +1,5 @@
 exports.up = (pgm) => {
-  pgm.createTable('albums', {
+  pgm.createTable('playlists', {
     id: {
       type: 'VARCHAR(50)',
       primaryKey: true,
@@ -8,15 +8,18 @@ exports.up = (pgm) => {
       type: 'TEXT',
       notNull: true,
     },
-    year: {
-      type: 'INTEGER',
+    owner: {
+      type: 'VARCHAR(50)',
       notNull: true,
+      references: '"users"',
+      referencesConstraintName: 'fk_playlists.user_id_user.id',
+      onDelete: 'cascade',
     },
-    createdAt: {
+    created_at: {
       type: 'DATE',
       notNull: true,
     },
-    updatedAt: {
+    updated_at: {
       type: 'DATE',
       notNull: true,
     },
@@ -24,5 +27,5 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable('albums');
+  pgm.dropTable('playlists');
 };
