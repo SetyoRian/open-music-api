@@ -116,10 +116,12 @@ class PlaylistHandler {
       const { id: playlistId } = request.params;
       const { songId } = request.payload;
       const { id: credentialId } = request.auth.credentials;
+      const action = 'add';
 
       await this._service.verifyPlaylistAccess(playlistId, credentialId);
       await this._service.verifySongId(songId);
       await this._service.addPlaylistSong(playlistId, songId);
+      await this._service.addActivities(playlistId, songId, credentialId, action);
 
       const response = h.response({
         status: 'success',
@@ -191,14 +193,51 @@ class PlaylistHandler {
       const { id: playlistId } = request.params;
       const { songId } = request.payload;
       const { id: credentialId } = request.auth.credentials;
+      const action = 'delete';
 
       await this._service.verifyPlaylistAccess(playlistId, credentialId);
       await this._service.verifySongId(songId);
       await this._service.removePlaylistSong(playlistId, songId);
+      await this._service.addActivities(playlistId, songId, credentialId, action);
 
       const response = h.response({
         status: 'success',
         message: 'Berhasil menghapus Song dari dalam Playlist',
+      });
+      response.code(200);
+      return response;
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
+    }
+  }
+
+  async getPlaylistActivities(request, h) {
+    try {
+      const { id } = request.params;
+      const { id: credentialId } = request.auth.credentials;
+
+      await this._service.verifyPlaylistAccess(id, credentialId);
+      const playlist = await this._service.getActivities(id);
+
+      const response = h.response({
+        status: 'success',
+        data: playlist,
       });
       response.code(200);
       return response;
