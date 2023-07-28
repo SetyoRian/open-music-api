@@ -46,6 +46,7 @@ class PlaylistHandler {
   async getPlaylist(request, h) {
     try {
       const { id: credentialId } = request.auth.credentials;
+
       const playlists = await this._service.getOwnerPlaylist(credentialId);
       return {
         status: 'success',
@@ -79,7 +80,7 @@ class PlaylistHandler {
       const { id } = request.params;
       const { id: credentialId } = request.auth.credentials;
 
-      await this._service.verifyPlaylistAccess(id, credentialId);
+      await this._service.verifyPlaylistOwner(id, credentialId);
       await this._service.removePlaylist(id);
 
       const response = h.response({
