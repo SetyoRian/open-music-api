@@ -332,6 +332,112 @@ class MusicHandler {
       return response;
     }
   }
+
+  async postAlbumLike(request, h) {
+    try {
+      const { id: userId } = request.auth.credentials;
+      const { id: albumId } = request.params;
+
+      await this._service.verifyUserLike(userId, albumId);
+      await this._service.addAlbumLike(userId, albumId);
+
+      const response = h.response({
+        status: 'success',
+        message: 'Berhasil meyukai Album',
+      });
+      response.code(201);
+      return response;
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
+    }
+  }
+
+  async deleteAlbumLike(request, h) {
+    try {
+      const { id: userId } = request.auth.credentials;
+      const { id: albumId } = request.params;
+
+      await this._service.verifyAlbum(albumId);
+      await this._service.removeAlbumLike(userId, albumId);
+
+      const response = h.response({
+        status: 'success',
+        message: 'Berhasil batal menyukai Album',
+      });
+      response.code(200);
+      return response;
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
+    }
+  }
+
+  async getAlbumLike(request, h) {
+    try {
+      const { id: albumId } = request.params;
+
+      await this._service.verifyAlbum(albumId);
+      const [likes, source] = await this._service.obtainAlbumLike(albumId);
+
+      const response = h.response({
+        status: 'success',
+        data: {
+          likes,
+        },
+      }).header('X-Data-Source', source);
+      response.code(200);
+      return response;
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      response.code(500);
+      console.error(error);
+      return response;
+    }
+  }
 }
 
 module.exports = MusicHandler;
